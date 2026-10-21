@@ -44,7 +44,7 @@ def _eligibility_score(report_dict: dict) -> float:
     return 0.0
 
 
-def _deadline_score(opp: "Opportunity") -> float:
+def _deadline_score(opp: Opportunity) -> float:
     if opp.deadline_at is None:
         return 0.1  # unknown deadline — low urgency but not zero
     days = (opp.deadline_at - date.today()).days
@@ -57,7 +57,7 @@ def _deadline_score(opp: "Opportunity") -> float:
     return max(0.0, 1.0 - (days / _URGENCY_HORIZON_DAYS))
 
 
-def _fit_score(opp: "Opportunity", applicant_interests: list[str]) -> float:
+def _fit_score(opp: Opportunity, applicant_interests: list[str]) -> float:
     if not applicant_interests:
         return 0.5  # neutral when no interests declared
     blob = " ".join(
@@ -75,7 +75,7 @@ def _fit_score(opp: "Opportunity", applicant_interests: list[str]) -> float:
     return min(1.0, hits / max(1, len(applicant_interests)))
 
 
-def _value_score(opp: "Opportunity") -> float:
+def _value_score(opp: Opportunity) -> float:
     text = " ".join([opp.title or "", opp.description or "", opp.summary or ""])
     amount = extract_funding_amount(text)
     if amount is None:
@@ -88,7 +88,7 @@ def _value_score(opp: "Opportunity") -> float:
     return min(1.0, math.log10(amount + 1) / 6.0)
 
 
-def _cost_score(opp: "Opportunity") -> float:
+def _cost_score(opp: Opportunity) -> float:
     """Lower application cost = higher score. We infer cost from text."""
     text = " ".join([opp.description or "", opp.summary or ""]).lower()
     if "no application fee" in text or "free to apply" in text:
@@ -98,7 +98,7 @@ def _cost_score(opp: "Opportunity") -> float:
     return 0.7  # assume no fee unless stated
 
 
-def _feasibility_score(opp: "Opportunity") -> float:
+def _feasibility_score(opp: Opportunity) -> float:
     """Simpler requirements = higher score. Heuristic based on text length
     and presence of heavy requirement keywords."""
     text = " ".join([opp.description or "", opp.summary or ""]).lower()
@@ -112,7 +112,7 @@ def _feasibility_score(opp: "Opportunity") -> float:
 
 
 def rank_opportunity(
-    opp: "Opportunity",
+    opp: Opportunity,
     applicant_interests: list[str] | None = None,
     weights: dict[str, float] | None = None,
 ) -> dict:

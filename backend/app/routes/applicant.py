@@ -16,7 +16,7 @@ from __future__ import annotations
 import csv
 import io
 import json
-from datetime import date, datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -39,7 +39,6 @@ from app.schemas import (
     LedgerCreate,
     LedgerResponse,
     LedgerUpdate,
-    RankedOpportunityResponse,
 )
 from app.scrapers.eligibility import passes_filter
 from app.scrapers.ranking import rank_opportunity
@@ -61,13 +60,19 @@ _VALID_TRANSITIONS: dict[str, set[str]] = {
 
 _TERMINAL_STATES = {"paid"}
 
+_LEDGER_STATUS_PATTERN = r"^(pending|submitted|receipt_verified|shortlisted|awarded|paid|rejected)$"
+_INBOX_FILTER_PATTERN = r"^(kenya|remote|fully_funded|direct_assistance|grants|scholarships)$"
+
 
 def _validate_transition(current: str, target: str) -> None:
     allowed = _VALID_TRANSITIONS.get(current, set())
     if target not in allowed:
         raise HTTPException(
             status_code=422,
-            detail=f"Cannot transition from '{current}' to '{target}'. Allowed: {sorted(allowed) or 'none (terminal)'}",
+            detail=(
+        f"Cannot transition from '{current}' to '{target}'. "
+        f"Allowed: {sorted(allowed) or 'none (terminal)'}"
+    ),
         )
 
 
@@ -110,7 +115,7 @@ def update_profile(payload: ApplicantProfileUpdate, db: Session = Depends(get_db
 # ---------------------------------------------------------------------------
 @router.get("/inbox")
 def ranked_inbox(
-    filter: str | None = Query(None, pattern="^(kenya|remote|fully_funded|direct_assistance|grants|scholarships)$"),
+    filter: str | None = Query(None, pattern=_INBOX_FILTER_PATTERN),
     search: str | None = Query(None),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
@@ -192,11 +197,14 @@ def create_ledger_entry(payload: LedgerCreate, db: Session = Depends(get_db)):
         notes=payload.notes,
     )
     if payload.status == "submitted":
-        entry.submitted_at = datetime.now(timezone.utc)
+        entry.submitted_at = datetime.now(UTC)
     if payload.status == "receipt_verified":
         if not payload.receipt_ref:
-            raise HTTPException(status_code=422, detail="receipt_ref is required to set status to 'receipt_verified'")
-        entry.receipt_verified_at = datetime.now(timezone.utc)
+            raise HTTPException(
+                status_code=422,
+                detail="receipt_ref is required to set status to 'receipt_verified'",
+            )
+        entry.receipt_verified_at = datetime.now(UTC)
 
     db.add(entry)
     db.commit()
@@ -214,7 +222,7 @@ def update_ledger_entry(entry_id: int, payload: LedgerUpdate, db: Session = Depe
         _validate_transition(entry.status, payload.status)
         entry.status = payload.status
         if payload.status == "submitted":
-            entry.submitted_at = datetime.now(timezone.utc)
+            entry.submitted_at = datetime.now(UTC)
         if payload.status == "receipt_verified":
             ref = payload.receipt_ref or entry.receipt_ref
             if not ref:
@@ -223,7 +231,7 @@ def update_ledger_entry(entry_id: int, payload: LedgerUpdate, db: Session = Depe
                     detail="receipt_ref is required to set status to 'receipt_verified'",
                 )
             entry.receipt_ref = ref
-            entry.receipt_verified_at = datetime.now(timezone.utc)
+            entry.receipt_verified_at = datetime.now(UTC)
 
     if payload.receipt_ref is not None:
         entry.receipt_ref = payload.receipt_ref

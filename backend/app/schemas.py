@@ -206,107 +206,18 @@ class ChecklistItemResponse(BaseModel):
     updated_at: datetime | None = None
 
 
+_LEDGER_STATUS_PATTERN = r"^(pending|submitted|receipt_verified|shortlisted|awarded|paid|rejected)$"
+
+
 class LedgerCreate(BaseModel):
     opportunity_id: int
-    status: str = Field(default="pending", pattern="^(pending|submitted|receipt_verified|shortlisted|awarded|paid|rejected)$")
+    status: str = Field(default="pending", pattern=_LEDGER_STATUS_PATTERN)
     receipt_ref: str | None = Field(default=None, max_length=2000)
     notes: str | None = None
 
 
 class LedgerUpdate(BaseModel):
-    status: str | None = Field(default=None, pattern="^(pending|submitted|receipt_verified|shortlisted|awarded|paid|rejected)$")
-    receipt_ref: str | None = Field(default=None, max_length=2000)
-    notes: str | None = None
-
-
-class LedgerResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    opportunity_id: int
-    status: str
-    receipt_ref: str | None = None
-    notes: str | None = None
-    submitted_at: datetime | None = None
-    receipt_verified_at: datetime | None = None
-    created_at: datetime
-    updated_at: datetime | None = None
-
-
-class RankedOpportunityResponse(BaseModel):
-    id: int
-    title: str
-    summary: str | None = None
-    opportunity_type: str
-    field: str | None = None
-    location: str | None = None
-    deadline: str | None = None
-    deadline_at: date | None = None
-    url: str
-    source_name: str | None = None
-    scraped_at: datetime
-    score: float
-    factors: dict
-    eligibility: dict
-
-
-# ---------------------------------------------------------------------------
-# Applicant autopilot schemas
-# ---------------------------------------------------------------------------
-class ApplicantProfileUpdate(BaseModel):
-    display_name: str | None = Field(default=None, max_length=200)
-    interests: str | None = None
-    country: str = "Kenya"
-
-
-class ApplicantProfileResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    display_name: str | None = None
-    interests: str | None = None
-    country: str
-    created_at: datetime
-    updated_at: datetime | None = None
-
-
-class ChecklistItemCreate(BaseModel):
-    opportunity_id: int
-    item_name: str = Field(min_length=1, max_length=300)
-    status: str = Field(default="missing", pattern="^(ready|missing|not_applicable|paused)$")
-    verified: bool = False
-    notes: str | None = None
-
-
-class ChecklistItemUpdate(BaseModel):
-    item_name: str | None = Field(default=None, min_length=1, max_length=300)
-    status: str | None = Field(default=None, pattern="^(ready|missing|not_applicable|paused)$")
-    verified: bool | None = None
-    notes: str | None = None
-
-
-class ChecklistItemResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    opportunity_id: int
-    item_name: str
-    status: str
-    verified: bool
-    notes: str | None = None
-    created_at: datetime
-    updated_at: datetime | None = None
-
-
-class LedgerCreate(BaseModel):
-    opportunity_id: int
-    status: str = Field(default="pending", pattern="^(pending|submitted|receipt_verified|shortlisted|awarded|paid|rejected)$")
-    receipt_ref: str | None = Field(default=None, max_length=2000)
-    notes: str | None = None
-
-
-class LedgerUpdate(BaseModel):
-    status: str | None = Field(default=None, pattern="^(pending|submitted|receipt_verified|shortlisted|awarded|paid|rejected)$")
+    status: str | None = Field(default=None, pattern=_LEDGER_STATUS_PATTERN)
     receipt_ref: str | None = Field(default=None, max_length=2000)
     notes: str | None = None
 

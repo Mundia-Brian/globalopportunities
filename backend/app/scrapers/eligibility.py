@@ -203,7 +203,7 @@ def _scan(text: str, positives: list[str], negatives: list[str]) -> tuple[str, l
     return "unknown", []
 
 
-def _opportunity_text(opp: "Opportunity") -> str:
+def _opportunity_text(opp: Opportunity) -> str:
     """Concatenate all free-text fields into one searchable blob."""
     parts = [opp.title or "", opp.description or "", opp.summary or "", opp.tags or ""]
     if opp.location:
@@ -213,7 +213,7 @@ def _opportunity_text(opp: "Opportunity") -> str:
     return " \n ".join(parts)
 
 
-def assess_kenya(opp: "Opportunity") -> EligibilityCheck:
+def assess_kenya(opp: Opportunity) -> EligibilityCheck:
     text = _opportunity_text(opp)
     verdict, evidence = _scan(text, _KENYA_POSITIVE, _KENYA_NEGATIVE)
     reason_map = {
@@ -224,7 +224,7 @@ def assess_kenya(opp: "Opportunity") -> EligibilityCheck:
     return EligibilityCheck(verdict=verdict, reason=reason_map[verdict], evidence=evidence)
 
 
-def assess_remote(opp: "Opportunity") -> EligibilityCheck:
+def assess_remote(opp: Opportunity) -> EligibilityCheck:
     text = _opportunity_text(opp)
     verdict, evidence = _scan(text, _REMOTE_POSITIVE, _REMOTE_NEGATIVE)
     reason_map = {
@@ -235,7 +235,7 @@ def assess_remote(opp: "Opportunity") -> EligibilityCheck:
     return EligibilityCheck(verdict=verdict, reason=reason_map[verdict], evidence=evidence)
 
 
-def assess_fully_funded(opp: "Opportunity") -> EligibilityCheck:
+def assess_fully_funded(opp: Opportunity) -> EligibilityCheck:
     text = _opportunity_text(opp)
     verdict, evidence = _scan(text, _FULLY_FUNDED_POSITIVE, _FULLY_FUNDED_NEGATIVE)
     reason_map = {
@@ -246,7 +246,7 @@ def assess_fully_funded(opp: "Opportunity") -> EligibilityCheck:
     return EligibilityCheck(verdict=verdict, reason=reason_map[verdict], evidence=evidence)
 
 
-def assess_direct_assistance(opp: "Opportunity") -> EligibilityCheck:
+def assess_direct_assistance(opp: Opportunity) -> EligibilityCheck:
     text = _opportunity_text(opp)
     verdict, evidence = _scan(text, _DIRECT_ASSISTANCE_POSITIVE, _DIRECT_ASSISTANCE_NEGATIVE)
     reason_map = {
@@ -257,7 +257,7 @@ def assess_direct_assistance(opp: "Opportunity") -> EligibilityCheck:
     return EligibilityCheck(verdict=verdict, reason=reason_map[verdict], evidence=evidence)
 
 
-def assess(opp: "Opportunity") -> EligibilityReport:
+def assess(opp: Opportunity) -> EligibilityReport:
     """Run all four eligibility checks and return a full report."""
     return EligibilityReport(
         kenya=assess_kenya(opp),
@@ -281,7 +281,7 @@ _FILTER_MAP = {
 }
 
 
-def passes_filter(opp: "Opportunity", filter_name: str) -> bool:
+def passes_filter(opp: Opportunity, filter_name: str) -> bool:
     """Return True if the opportunity passes the named filter.
 
     For type-based filters (grants, scholarships), this checks
