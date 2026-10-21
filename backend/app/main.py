@@ -16,6 +16,7 @@ from app.routes import (
     admin_auth,
     admin_listings,
     analytics,
+    applicant,
     moderation,
     opportunities,
     scraper,
@@ -166,7 +167,7 @@ app.include_router(subscribers.router, prefix="/api/v1")
 app.include_router(analytics.router, prefix="/api/v1")
 app.include_router(moderation.router, prefix="/api/v1")
 app.include_router(admin_auth.router, prefix="/api/v1")
-app.include_router(admin_listings.router, prefix="/api/v1")
+app.include_router(applicant.router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
